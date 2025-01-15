@@ -1,8 +1,9 @@
 """
 FastAPI Webhook Module
 Author: @DanielChristello - 2024
-Version: 0.4
-
+Version: 0.0
+Este es un módulo que debe incluirse en main.py
+Esta es la primera versión que funciona y la más silmple por eso es versión 0.0
 Este servicio FastAPI está diseñado para manejar solicitudes de verificación de un webhook de Meta
 1. Verificar la validez de las notificaciones entrantes.
 2. Procesar los mensajes recibidos y extraer la información relevante.
@@ -37,8 +38,6 @@ try:
     PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
     META_API_VER= os.getenv("META_API_VER")
     META_URL= os.getenv("META_URL")
-    RECIPIENT_ITEM_1 = os.getenv("RECIPIENT_ITEM_1")
-    RECIPIENT_WAID_1 = os.getenv("RECIPIENT_WAID_1")
 
     if not all([VERIFY_TOKEN, ACCESS_TOKEN, PHONE_NUMBER_ID, META_API_VER, META_URL]):
         raise ValueError("Faltan variables de entorno necesarias.")
@@ -102,11 +101,6 @@ async def handle_messages(request: Request):
                 
                 logger.info(f"Mensaje de {from_number}: {message_body}")
                 if from_number and message_body:
-                    if from_number == RECIPIENT_WAID_1:
-                        from_number = RECIPIENT_ITEM_1
-                        logger.info(f"RECIPIENT_WAID_1: {RECIPIENT_WAID_1} detectado, cambiando a RECIPIENT_ITEM_1: {RECIPIENT_ITEM_1}")
-                    else:
-                        logger.info(f"RECIPIENT_WAID_1: {RECIPIENT_WAID_1} no detectado.")            
                     response_message = "Hola, ¿en qué puedo servirte?"
                     send_message_via_whatsapp(from_number, response_message)
 
@@ -114,11 +108,9 @@ async def handle_messages(request: Request):
     except Exception as e:
         logger.error(f"Error al procesar el mensaje: {str(e)}")
         raise HTTPException(status_code=500, detail="Error procesando el mensaje")
-      
-# Función para enviar un mensaje al celular
-def send_message_via_whatsapp(to: str, response_message: str, language: str = "es"):
+
+def send_message_via_whatsapp(to: str, message_template_name: str, language: str = "es"):
     url = f"{META_URL}/{META_API_VER}/{PHONE_NUMBER_ID}/messages"
-   
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
         "Content-Type": "application/json"
@@ -126,34 +118,20 @@ def send_message_via_whatsapp(to: str, response_message: str, language: str = "e
     payload = {
         "messaging_product": "whatsapp",
         "to": to,
-        "type": "text",
-        "text": {
-            "body": response_message,
+        "type": "template",
+        "template": {
+            "name": message_template_name,
+            "language": {
+                "code": language
+            }
         }
     }
-
-    try:
-        logger.info(f"\n Enviando POST a {url} con payload: {json.dumps(payload, indent=2)}")
-        response = requests.post(url, headers=headers, json=payload)
-
-        # Levanta una excepción si el código de estado es >= 400
-        response.raise_for_status()
-
-        logger.info(f"Mensaje enviado exitosamente a {to}: {response_message}")
-    except requests.exceptions.HTTPError as e:
-        logger.error(f"Error HTTP al enviar el mensaje a {to}: {response.status_code} - {response.text}")
-        if response.status_code == 400:
-            logger.error(f"Detalles del error: {response.json().get('error', {}).get('error_data', {}).get('details')}")
-            raise HTTPException(status_code=response.status_code, detail=response.text)
-    except requests.exceptions.ConnectionError as e:
-        logger.error(f"Error de conexión al enviar el mensaje a {to}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error de conexión con el servidor de WhatsApp")
-    except requests.exceptions.Timeout as e:
-        logger.error(f"Tiempo de espera agotado al enviar el mensaje a {to}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Tiempo de espera agotado")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error inesperado al enviar el mensaje a {to}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error inesperado al enviar el mensaje")
+    logger.info(f"Enviando POST a {url} con payload: {json.dumps(payload, indent=2)}")
+    response = requests.post(url, headers=headers, json=payload)
+    if response.status_code == 200:
+        logger.info(f"Mensaje enviado exitosamente a {to}: {message_template_name}")
+    else:
+        logger.error(f"Error al enviar el mensaje a :{to} {response.status_code} - {response.text}")
 
 def start_fastapi():
     """
