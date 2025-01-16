@@ -30,7 +30,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-load_dotenv()                                       # Load the environment variables from the .env file
+load_dotenv(override=True)                                       # Load the environment variables from the .env file
 try:
     VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
     ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
