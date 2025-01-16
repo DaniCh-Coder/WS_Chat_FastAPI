@@ -17,11 +17,10 @@ https://developers.facebook.com/docs/whatsapp/api/webhooks/inbound#verify-webhoo
 from fastapi import FastAPI, Request, HTTPException # FastAPI class to handle the API requests and exceptios
 from fastapi.responses import PlainTextResponse     # PlainTextResponse class to handle the responses of the API
 import logging                                      # logging module to handle the logging of the application
-import json                                         # json module to handle the JSON data
 from config.settings import Settings                # Import the Settings class from the settings module
 from services.wa_services import send_message_via_wa
 from schemas.webhook import WebhookPayload
-
+from services.exceptions import MissingParametersException, InvalidTokenException, InvalidModeException  # Import the custom exceptions
 
 # Configuración de logging
 # Configura logging para registrar eventos importantes, como verificaciones exitosas o fallidas.
@@ -52,17 +51,18 @@ async def verify_webhook(request: Request):
 
     if not all([mode, token, challenge]):
         logger.warning("Faltan parámetros en la solicitud GET.")
-        raise HTTPException(status_code=400, detail="Parámetros insuficientes en la solicitud.")
-    if mode == "subscribe" and token == Settings.VERIFY_TOKEN:
-        logger.info("Webhook verificado con éxito.")
-        return PlainTextResponse(content=challenge, status_code=200)
-    else:
-        logger.warning("Intento de verificación fallido.")
-        if token != Settings.VERIFY_TOKEN:
-            logger.warning(f"Token de verificación incorrecto. Meta: {token}. Local: {Settings.VERIFY_TOKEN}")
-        if mode != "subscribe":
-            logger.warning(f"Modo de verificación incorrecto: {mode}")
-        raise HTTPException(status_code=403, detail="Verificación fallida")
+        raise MissingParametersException()
+
+    if mode != "subscribe":
+        logger.warning(f"Modo de verificación incorrecto: {mode}")
+        raise InvalidModeException(provided_mode=mode)
+
+    if token != Settings.VERIFY_TOKEN:
+        logger.warning(f"Token de verificación incorrecto. Meta: {token}. Local: {Settings.VERIFY_TOKEN}")
+        raise InvalidTokenException(provided_token=token, expected_token=Settings.VERIFY_TOKEN)
+
+    logger.info("Webhook verificado con éxito.")
+    return PlainTextResponse(content=challenge, status_code=200)
     
 @app.post("/webhook")
 async def handle_messages(payload: WebhookPayload):
