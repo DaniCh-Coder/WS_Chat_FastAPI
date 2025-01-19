@@ -16,7 +16,7 @@ Este módulo contiene funciones para enviar mensajes de WhatsApp Business API.
 import requests
 import logging
 import json
-from config.settings import Settings
+from config_setup.settings import settings
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
@@ -26,11 +26,11 @@ def get_from_number(from_number: str) -> str:
     Verifica si el número de teléfono del remitente es el número de teléfono de WhatsApp Business API.
     Si es así, cambia el FORMATO del número de teléfono del remitente al número de teléfono de WhatsApp Business API.
     """
-    if from_number == Settings.RECIPIENT_WAID_1:
-        from_number = Settings.RECIPIENT_ITEM_1
-        logger.info(f"RECIPIENT_WAID_1: {Settings.RECIPIENT_WAID_1} detectado, cambiando a RECIPIENT_ITEM_1: {Settings.RECIPIENT_ITEM_1}")
+    if from_number == settings.RECIPIENT_WAID_1:
+        from_number = settings.RECIPIENT_ITEM_1
+        logger.info(f"RECIPIENT_WAID_1: {settings.RECIPIENT_WAID_1} detectado, cambiando a RECIPIENT_ITEM_1: {settings.RECIPIENT_ITEM_1}")
     else:
-        logger.info(f"RECIPIENT_WAID_1: {Settings.RECIPIENT_WAID_1} no detectado.")
+        logger.info(f"RECIPIENT_WAID_1: {settings.RECIPIENT_WAID_1} no detectado.")
     return from_number        
 
 def send_message_via_wa(to: str, response_message: str, language: str = "es"):
@@ -38,9 +38,9 @@ def send_message_via_wa(to: str, response_message: str, language: str = "es"):
     Envia un mensaje usando la API de WhatsApp Business.
     """
     to = get_from_number(to)    # controla si reqiere cambiar el formato del número de teléfono del remitente
-    url = f"{Settings.META_URL}/{Settings.META_API_VER}/{Settings.PHONE_NUMBER_ID}/messages"
+    url = f"{settings.META_URL}/{settings.META_API_VER}/{settings.PHONE_NUMBER_ID}/messages"
     headers = {
-        "Authorization": f"Bearer {Settings.ACCESS_TOKEN}",
+        "Authorization": f"Bearer {settings.ACCESS_TOKEN}",
         "Content-Type": "application/json"
     }
     payload = {

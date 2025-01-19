@@ -1,4 +1,4 @@
-# exceptions.py
+# exception_handlers.py
 """
 Modulo para el manejo de errores y excepciones
 Este script define excepciones personalizadas para manejar errores relacionados con el Webhook y tiene las siguientes ventajas:
@@ -42,3 +42,4 @@ class InvalidModeException(WebhookException):
         detail = f"Modo de verificación no válido: {provided_mode}. Solo se acepta 'subscribe'."
         extra_data = {"provided_mode": provided_mode}
         super().__init__(status_code=403, detail=detail, extra_data=extra_data)
+        

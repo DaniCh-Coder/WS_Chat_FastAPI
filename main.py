@@ -4,16 +4,22 @@ Este script:
 1. Testea un tunel ngrok. 
 2.Si no esta funcionando intenta crearlo.
 3. Luego arranca el servidor FastAPI.
---------------------------------------------------------------
-my_project/
-├── main.py          # Define la aplicación FastAPI y las rutas.
-├── services.py      # Lógica de negocio (opcional).
-├── run.py           # Arranque del servidor Uvicorn.
-└── requirements.txt # Dependencias del proyecto.
 '''
 import logging
-from utils.ngrok_utils import test_ngrok_tunnel, get_ngrok_tunnel
-from services.fa_services import start_fastapi
+import sys
+import os
+
+# Llama directamente a la función antes de las importaciones locales
+def add_project_root_to_path():
+    """
+    Añade la raíz del proyecto a sys.path si no está ya incluido.
+    """
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    if project_root not in sys.path:
+        sys.path.append(project_root)
+        logging.info(f"Ruta del proyecto añadida a sys.path: {sys.path} \n")
+    else:
+        logging.info(f"Ruta del proyecto correcta en sys.path: {sys.path} \n")
 
 # Configuración del logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -24,6 +30,9 @@ def start_ng_fa():
     Verifica y maneja el estado de un túnel ngrok.
     """
     try:
+        from utils.ngrok_utils import test_ngrok_tunnel, get_ngrok_tunnel
+        from services.fa_services import start_fastapi
+
         result = test_ngrok_tunnel()
         logging.info(result)
 
@@ -41,6 +50,9 @@ def start_ng_fa():
 
 if __name__ == "__main__":
     try:
+        # Revisa el path del proyecto
+        add_project_root_to_path()
+
         # Llama al bucle asincrónico de forma correcta
         start_ng_fa()
     except Exception as e:
