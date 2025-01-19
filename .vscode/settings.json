@@ -1,7 +1,0 @@
-{
-    "markdown-preview-enhanced.automaticallyShowPreviewOfMarkdownBeingEdited": true,
-    "markdown-preview-enhanced.enableHTML5Embed": true,
-    "python.analysis.extraPaths": [
-        "./config_setup"
-    ]
-}
