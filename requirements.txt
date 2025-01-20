@@ -1,13 +1,11 @@
-fastapi==0.115.6
-httpx==0.28.1
-pydantic==2.10.5
-pydantic_settings==2.7.1
-python-dotenv==1.0.1
-Requests==2.32.3
-starlette==0.45.2
-uvicorn==0.34.0
-loguru==0.7.3               # Usado para logging
-pyngrok==7.2.3              # Necesario si usas ngrok en tu proyecto
-pytest==8.3.4               # Si lo usas para pruebas en tu entorno de desarrollo
-backports.tarfile==1.2.0    # Añadido por si lo necesitas para compatibilidad con versiones de Python
-ujson==5.10.0               # Usado para JSON de alto rendimiento
+# libraries required for the project
+fastapi[all]
+httpx
+pydantic
+pydantic-settings
+python-dotenv
+requests
+uvicorn
+loguru               # Usado para logging
+pyngrok              # Necesario si usas ngrok en tu proyecto
+ujson                # Usado para JSON de alto rendimiento
